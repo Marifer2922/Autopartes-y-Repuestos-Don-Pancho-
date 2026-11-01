@@ -8,6 +8,12 @@ require_once __DIR__ . '/../Usuario.php';
 $conexion = new ConexionBD();
 $pdo = $conexion->conectar();
 
+if ($pdo === null) {
+    $_SESSION['error_login'] = 'No se pudo conectar con la BD';
+    header('Location: ../Frontend/login.php');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     exit('El metodo no esta permitido');
@@ -26,12 +32,6 @@ $correo = trim($correo);
 
 if ($correo === '' || $contraseña === '') {
     $_SESSION['error_login'] = 'Por favor llene todos los campos';
-    header('Location: ../Frontend/login.php');
-    exit;
-}
-
-if ($pdo === null) {
-    $_SESSION['error_login'] = 'No se pudo conectar con la BD';
     header('Location: ../Frontend/login.php');
     exit;
 }
@@ -56,8 +56,16 @@ try {
     $_SESSION['usuario_rol'] = $usuario['rol'];
     $_SESSION['autenticado'] = true;
 
-    header('Location: ../Frontend/login.php');
-    exit;
+    if ($usuario['rol'] === Usuario::ROL_ADMIN) {
+        header('Location: ../Frontend/admin.php');
+        exit;
+    }
+
+    if ($usuario['rol'] === Usuario::ROL_BODEGUERO) {
+        header('Location: ../Frontend/bodega.php');
+        exit;
+    }
+
 
 } catch (Throwable $excepcion) {
 

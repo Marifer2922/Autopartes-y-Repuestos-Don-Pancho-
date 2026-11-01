@@ -1,5 +1,13 @@
 <?php
 declare(strict_types=1);
+
+require_once __DIR__ . '/../Backend/verificarsesion.php';
+
+if ($_SESSION['usuario_rol'] !== 'admin') {
+    header('Location: bodega.php');
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
