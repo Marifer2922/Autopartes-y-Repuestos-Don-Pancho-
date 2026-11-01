@@ -1,5 +1,21 @@
 <?php
 declare(strict_types=1);
+session_start();
+require_once __DIR__ . '/../../include/conexion.php';
+
+$conexion = new ConexionBD();
+$pdo = $conexion->conectar();
+
+$insignias = [];
+if ($pdo !== null) {
+    $stmt = $pdo->query("SELECT r.*, c.nombre AS categoria, m.nombre AS marca 
+                         FROM repuestos r 
+                         LEFT JOIN categorias c ON r.categoria_id = c.id 
+                         LEFT JOIN marcas_vehiculo m ON r.marca_id = m.id 
+                         WHERE r.destacado = 1 AND r.activo = 1 
+                         ORDER BY r.id ASC LIMIT 5");
+    $insignias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -44,8 +60,6 @@ declare(strict_types=1);
     </nav>
 
     <main>
-
-           <!-- Bienvenida de prueba eliminar este comentario despues :D -->
         <section class="container py-5">
             <div class="row align-items-center g-4">
                 <div class="col-lg-6">
@@ -60,6 +74,52 @@ declare(strict_types=1);
 
             </div>
 
+        </section>
+
+        <section class="bg-white py-5 border-top border-bottom">
+            <div class="container">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Nuestros 5 Repuestos Insignia</h3>
+                    <p class="text-muted">Piezas destacadas de alta rotación consultadas en tiempo real desde la base de datos</p>
+                </div>
+                <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-3">
+                    <?php if (empty($insignias)): ?>
+                        <div class="col-12 text-center text-muted py-4">No hay repuestos insignia disponibles en este momento.</div>
+                    <?php else: ?>
+                        <?php foreach ($insignias as $item): ?>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm border-0">
+                                <img src="../../uploads/<?= htmlspecialchars($item['fotografia'] ?? 'default.jpg') ?>" 
+                                     class="card-img-top object-fit-cover" style="height: 150px;" 
+                                     alt="<?= htmlspecialchars($item['nombre']) ?>"
+                                     onerror="this.src='../imagenes/logo.jpg'">
+                                <div class="card-body p-3 d-flex flex-column">
+                                    <span class="badge bg-secondary mb-1 small"><?= htmlspecialchars($item['categoria'] ?? 'Repuesto') ?></span>
+                                    <h6 class="card-title fw-bold text-truncate" title="<?= htmlspecialchars($item['nombre']) ?>"><?= htmlspecialchars($item['nombre']) ?></h6>
+                                    <p class="card-text small text-muted flex-grow-1"><?= htmlspecialchars($item['especificaciones'] ?? $item['descripcion'] ?? '') ?></p>
+                                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                        <span class="fw-bold text-danger">L. <?= number_format((float)$item['precio'], 2) ?></span>
+                                        <a href="" class="btn btn-sm btn-outline-dark">Comprar</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 text-center">
+            <h4 class="fw-bold mb-4 text-secondary text-uppercase">Marcas Vehiculares Aliadas</h4>
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
+                <div class="col"><div class="p-3 border rounded shadow-sm bg-white fw-bold fs-5 text-dark">Toyota</div></div>
+                <div class="col"><div class="p-3 border rounded shadow-sm bg-white fw-bold fs-5 text-dark">Nissan</div></div>
+                <div class="col"><div class="p-3 border rounded shadow-sm bg-white fw-bold fs-5 text-dark">Honda</div></div>
+                <div class="col"><div class="p-3 border rounded shadow-sm bg-white fw-bold fs-5 text-dark">Hyundai</div></div>
+                <div class="col"><div class="p-3 border rounded shadow-sm bg-white fw-bold fs-5 text-dark">Isuzu</div></div>
+                <div class="col"><div class="p-3 border rounded shadow-sm bg-white fw-bold fs-5 text-dark">Ford</div></div>
+            </div>
         </section>
 
     </main>
