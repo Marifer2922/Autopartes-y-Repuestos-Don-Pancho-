@@ -1,5 +1,25 @@
 <?php
 declare(strict_types=1);
+session_start();
+require_once __DIR__ . '/../../include/conexion.php';
+
+$conexion = new ConexionBD();
+$pdo = $conexion->conectar();
+
+$categoriaFiltro = isset($_GET['cat']) ? (int)$_GET['cat'] : 0;
+$categorias = $pdo->query("SELECT * FROM categorias ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+$sql = "SELECT r.*, c.nombre AS categoria, m.nombre AS marca 
+        FROM repuestos r 
+        INNER JOIN categorias c ON r.categoria_id = c.id 
+        LEFT JOIN marcas_vehiculo m ON r.marca_id = m.id 
+        WHERE r.activo = 1";
+
+if ($categoriaFiltro > 0) {
+    $sql .= " AND r.categoria_id = " . $categoriaFiltro;
+}
+$sql .= " ORDER BY c.id, r.nombre ASC";
+$repuestos = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -43,10 +63,54 @@ declare(strict_types=1);
         </div>
     </nav>
 
-    <main>
+    <main class="container py-5">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Catálogo General de Repuestos</h2>
+                <p class="text-secondary mb-0">Piezas consultadas directamente desde nuestra base de datos</p>
+            </div>
+            <div class="btn-group my-2" role="group">
+                <a href="repuestos.php" class="btn btn-outline-dark <?= $categoriaFiltro === 0 ? 'active' : '' ?>">Todas</a>
+                <?php foreach ($categorias as $c): ?>
+                    <a href="repuestos.php?cat=<?= $c['id'] ?>" class="btn btn-outline-dark <?= $categoriaFiltro === (int)$c['id'] ? 'active' : '' ?>">
+                        <?= htmlspecialchars($c['nombre']) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
 
-
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            <?php if (empty($repuestos)): ?>
+                <div class="col-12 text-center text-muted py-5">No se encontraron repuestos para la categoría seleccionada.</div>
+            <?php else: ?>
+                <?php foreach ($repuestos as $r): ?>
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <img src="../../uploads/<?= htmlspecialchars($r['fotografia'] ?? 'default.jpg') ?>" 
+                             class="card-img-top object-fit-cover" style="height: 180px;" 
+                             alt="<?= htmlspecialchars($r['nombre']) ?>"
+                             onerror="this.src='../imagenes/logo.jpg'">
+                        <div class="card-body d-flex flex-column p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-secondary small"><?= htmlspecialchars($r['categoria']) ?></span>
+                                <span class="badge bg-light text-dark border small"><?= htmlspecialchars($r['codigo']) ?></span>
+                            </div>
+                            <h5 class="card-title fw-bold mt-2 fs-6"><?= htmlspecialchars($r['nombre']) ?></h5>
+                            <p class="card-text small text-muted flex-grow-1 mb-2">
+                                <strong>Especificaciones:</strong> <?= htmlspecialchars($r['especificaciones'] ?? $r['descripcion'] ?? 'N/D') ?>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-auto">
+                                <span class="fw-bold fs-5 text-danger">L. <?= number_format((float)$r['precio'], 2) ?></span>
+                                <a href="facturacion.php?repuesto_id=<?= $r['id'] ?>" class="btn btn-warning btn-sm fw-semibold"><i class="bi bi-cart-plus"></i> Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </main>
+
     <footer class="bg-dark text-light py-4">
         <div class="container">
             <div class="text-center mb-4">
