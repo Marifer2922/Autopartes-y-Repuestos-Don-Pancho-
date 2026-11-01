@@ -1,7 +1,13 @@
 <?php
 declare(strict_types=1);
 
+
 require_once __DIR__ . '/../Backend/verificarsesion.php';
+require_once __DIR__ . '/../../include/conexion.php';
+require_once __DIR__ . '/../Repuesto.php';
+
+$conexion = new ConexionBD();
+$pdo = $conexion->conectar();
 
 if ($_SESSION['usuario_rol'] !== 'admin') {
     header('Location: bodega.php');
@@ -56,6 +62,24 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
 
                         if(move_uploaded_file($imagenProducto['tmp_name'], $destinoImagen)){
                             $estadoSubida = true;
+
+                            $codigo = htmlspecialchars(trim($_POST['codigoProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
+                            $nombre = htmlspecialchars(trim($_POST['nombreProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
+                            $descripcion = htmlspecialchars(trim($_POST['descripcionProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
+                            $especificaciones = htmlspecialchars(trim($_POST['especificacionProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
+                            $categoria_id = intval(htmlspecialchars(trim($_POST['categoriaProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
+                            $marca_id = intval(htmlspecialchars(trim($_POST['marcaProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
+                            $precio = floatval(htmlspecialchars(trim($_POST['precioProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
+                            $stock = intval(htmlspecialchars(trim($_POST['stockProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
+                            $destacado = intval(htmlspecialchars(trim($_POST['destacadoProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
+
+                            $datos = ["codigo" => $codigo, "nombre" => $nombre, "descripcion" => $descripcion, "especificaciones" => $especificaciones,
+                                        "categoria_id" => $categoria_id, "marca_id" => $marca_id, "precio" => $precio, "stock" => $stock,
+                                        "fotografia" => $destinoImagen, "destacado" => $destacado];
+
+                            $nuevoProducto = new Repuesto($pdo);
+                            $nuevoProducto->crear($datos);
+
                         } else {
                             $estadoSubida = false;
                             $mensajeEstado = "Error al subir la imagen al directorio final";
@@ -149,7 +173,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                         </div>
                         <div class="modal-body">
                             <h4>Ingrese los datos solicitados:</h4>
-                            <form method="post" action="subir_imagen.php" enctype="multipart/form-data">
+                            <form method="post" action="admin.php" enctype="multipart/form-data">
                                 <div class="p-2">
                                     <label class="form-label" for="input-codigo-producto">Código del repuesto: </label>
                                     <input type="text" class="form-control" name="codigoProducto" id="input-codigo-producto" required>
@@ -197,6 +221,13 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                                 <div class="p-2">
                                     <label class="form-label" for="input-imagen-producto">Imagen del repuesto: </label>
                                     <input type="file" class="form-control" name="imagenProducto" id="input-imagen-producto">
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-destacado-producto">Destacado: </label>
+                                    <select class="form-select" name="destacadoProducto" id="input-destacado-producto" required>
+                                        <option value="1">Si</option>
+                                        <option value="2">No</option>
+                                    </select>
                                 </div>
                                 <div class="p-2 d-flex justify-content-center">
                                     <button type="submit" class="btn btn-warning">Ingresar nuevo producto</button>
