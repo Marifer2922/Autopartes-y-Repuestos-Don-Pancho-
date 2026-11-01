@@ -1,5 +1,60 @@
 <?php
-declare(strict_types=1);
+
+    declare(strict_types=1);
+
+    //Carga segura de archivos
+    if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['imagenProducto'])){
+        //Valida que no exista error al intentar subir el archivo
+        $imagenProducto = $_FILES['imagenProducto'];
+
+        if($imagenProducto['error'] !== UPLOAD_ERR_OK){
+            echo "Error al intentar subir la imagen, intentelo de nuevo";
+        } else {
+            //Validación del tamaño máximo del archivo (4MB)
+            $limiteTamaño = 4*1024*1024;
+
+            if($imagenProducto['size'] > $limiteTamaño){
+                echo "El tamaño de la imagen excede el límite establecido (4MB)";
+            } else {
+                //Validación de la extensión del archivo
+                $extensionImagen = strtolower(pathinfo($imagenProducto['name'], PATHINFO_EXTENSION));
+                $extensionesPermitidos = ['jpg', 'jpeg', 'png', 'webp'];
+
+                if(!in_array($extensionImagen, $extensionesPermitidos, true)){
+                    echo "El formato de la imagen no es soportado por el sitio, seleccione una imagen
+                            con una de las extensiones permitidas (JPG, JPEG, PNG, WEBP)";
+                } else {
+                    //Validación del tipo MIME del archivo
+                    $infoMime = new finfo(FILEINFO_MIME_TYPE);
+                    $imagenMime = $infoMime->file($imagenProducto['tmp_name']);
+                    $mimePermitidos = ['image/jpg', 'imagen/jpeg', 'image/png', 'image/webp'];
+
+                    if(!in_array($imagenMime, $mimePermitidos, true)){
+                        echo "El archivo seleccionado no es del tipo imagen valido.";
+                    } else {
+                        //Renombrar imagen y asignación de identificador criptográfico
+                        $nombreNuevoImagen = uniqid('repuesto_') .'.'. $extensionImagen;
+                        //Se asigna el destino del archivo
+                        $ruta = __DIR__ . '/uploads/'; 
+
+                        //Se verifica que la ruta exista, de otro modo crea la carpeta
+                        if (!is_dir($ruta)) {
+                            mkdir($ruta, 0755, true);
+                        }
+
+                        $destinoImagen = $ruta . $nombreNuevoImagen;
+
+                        if(move_uploaded_file($imagenProducto['tmp_name'], $destinoImagen)){
+                            echo "Exito al subir la imagen";
+                        } else {
+                            echo "Error al subir la imagen al directorio final";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -45,6 +100,82 @@ declare(strict_types=1);
 
     <main>
 
+        <!--Boton para ingresar nuevos productos-->
+            <section class="py-4">
+                <div class="container">
+                    <button type="button" class="btn btn-warning fw-bold" data-bs-toggle="modal" data-bs-target="#modal-nuevo-repuesto">
+                        Ingrese nuevo producto
+                    </button>
+                </div>
+            </section>
+
+        <!--Ventana modal para ingresar los nuevos productos-->
+            <div class="modal fade" id="modal-nuevo-repuesto" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-secondary text-light shadow-lg">
+                            <h3 class="modal-title">INGRESO DE NUEVO PRODUCTO</h3>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h4>Ingrese los datos solicitados:</h4>
+                            <form method="post" action="subir_imagen.php" enctype="multipart/form-data">
+                                <div class="p-2">
+                                    <label class="form-label" for="input-codigo-producto">Código del repuesto: </label>
+                                    <input type="text" class="form-control" name="codigoProducto" id="input-codigo-producto" required>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-nombre-producto">Nombre: </label>
+                                    <input type="text" class="form-control" name="nombreProducto" id="input-nombre-producto" required>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-especificacion-producto">Especificaciones: </label>
+                                    <textarea class="form-control" name="especificacionProducto" id="input-especificacion-producto" rows="2"></textarea>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-descripcion-producto">Descripción del repuesto: </label>
+                                    <textarea class="form-control" name="descripcionProducto" id="input-descripcion-producto" rows="2"></textarea>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-categoria-producto">Categoria: </label>
+                                    <select class="form-select" name="categoriaProducto" id="input-categoria-producto" required>
+                                        <option value="1">Frenos y suspension</option>
+                                        <option value="2">Motor y transmisión</option>
+                                        <option value="3">Sistema eléctrico</option>
+                                        <option value="4">Fluidos y lubricantes</option>
+                                    </select>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-marca-producto">Marca: </label>
+                                    <select class="form-select" name="marcaProducto" id="input-marca-producto">
+                                        <option value="1">Toyota</option>
+                                        <option value="2">Nissan</option>
+                                        <option value="3">Honda</option>
+                                        <option value="4">Hyundai</option>
+                                        <option value="5">Isuzu</option>
+                                        <option value="6">Ford</option>
+                                    </select>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-precio-producto">Precio: </label>
+                                    <input type="text" class="form-control" name="precioProducto" id="input-precio-producto" required>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-stock-producto">Cantidad en bodega: </label>
+                                    <input type="number" class="form-control" name="stockProducto" id="input-stock-producto" min=0 required>
+                                </div>
+                                <div class="p-2">
+                                    <label class="form-label" for="input-imagen-producto">Imagen del repuesto: </label>
+                                    <input type="file" class="form-control" name="imagenProducto" id="input-imagen-producto">
+                                </div>
+                                <div class="p-2 d-flex justify-content-center">
+                                    <button type="submit" class="btn btn-warning">Ingresar nuevo producto</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
     </main>
     <footer class="bg-dark text-light py-4">
