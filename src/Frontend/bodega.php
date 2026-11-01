@@ -14,29 +14,33 @@
         $imagenProducto = $_FILES['imagenProducto'];
 
         if($imagenProducto['error'] !== UPLOAD_ERR_OK){
-            echo "Error al intentar subir la imagen, intentelo de nuevo";
+            $estadoSubida = false;
+            $mensajeEstado = "Error al intentar subir la imagen, intentelo de nuevo";
         } else {
             //Validación del tamaño máximo del archivo (4MB)
             $limiteTamaño = 4*1024*1024;
 
             if($imagenProducto['size'] > $limiteTamaño){
-                echo "El tamaño de la imagen excede el límite establecido (4MB)";
+                $estadoSubida = false;
+                $mensajeEstado = "El tamaño de la imagen excede el límite establecido (4MB)";
             } else {
                 //Validación de la extensión del archivo
                 $extensionImagen = strtolower(pathinfo($imagenProducto['name'], PATHINFO_EXTENSION));
                 $extensionesPermitidos = ['jpg', 'jpeg', 'png', 'webp'];
 
                 if(!in_array($extensionImagen, $extensionesPermitidos, true)){
-                    echo "El formato de la imagen no es soportado por el sitio, seleccione una imagen
+                    $estadoSubida = false;
+                    $mensajeEstado = "El formato de la imagen no es soportado por el sitio, seleccione una imagen
                             con una de las extensiones permitidas (JPG, JPEG, PNG, WEBP)";
                 } else {
                     //Validación del tipo MIME del archivo
                     $infoMime = new finfo(FILEINFO_MIME_TYPE);
                     $imagenMime = $infoMime->file($imagenProducto['tmp_name']);
-                    $mimePermitidos = ['image/jpg', 'imagen/jpeg', 'image/png', 'image/webp'];
+                    $mimePermitidos = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp'];
 
                     if(!in_array($imagenMime, $mimePermitidos, true)){
-                        echo "El archivo seleccionado no es del tipo imagen valido.";
+                        $estadoSubida = false;
+                        $mensajeEstado = "El archivo seleccionado no es del tipo imagen valido.";
                     } else {
                         //Renombrar imagen y asignación de identificador criptográfico
                         $nombreNuevoImagen = uniqid('repuesto_') .'.'. $extensionImagen;
@@ -51,9 +55,10 @@
                         $destinoImagen = $ruta . $nombreNuevoImagen;
 
                         if(move_uploaded_file($imagenProducto['tmp_name'], $destinoImagen)){
-                            echo "Exito al subir la imagen";
+                            $estadoSubida = true;
                         } else {
-                            echo "Error al subir la imagen al directorio final";
+                            $estadoSubida = false;
+                            $mensajeEstado = "Error al subir la imagen al directorio final";
                         }
                     }
                 }
@@ -105,6 +110,25 @@
     </nav>
 
     <main>
+
+        <!--Mensaje de estado de ingreso de producto-->
+            <?php if($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+                <?php if($estadoSubida): ?>
+                    <div class="container py-4">
+                        <div class="badge rounded-pill bg-success">
+                            <h5 class="m-2"><i class="bi bi-check2-circle"></i> Excito al ingresar el producto.</h5>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <?php if(!$estadoSubida): ?>
+                    <div class="container py-4">
+                        <div class="badge rounded-pill bg-danger">
+                            <h5 class="m-2"><i class="bi bi-x-circle"></i> Error al ingresar el nuevo producto</h5>
+                            <p class="m-1"><?= $mensajeEstado ?></p>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
 
         <!--Boton para ingresar nuevos productos-->
             <section class="py-4">
