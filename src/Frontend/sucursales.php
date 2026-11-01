@@ -1,5 +1,24 @@
 <?php
 declare(strict_types=1);
+session_start();
+require_once __DIR__ . '/../../include/conexion.php';
+
+$conexion = new ConexionBD();
+$pdo = $conexion->conectar();
+
+$sucursales = [];
+$historial = [];
+if ($pdo !== null) {
+    $sucursales = $pdo->query("SELECT * FROM sucursales ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+    // Consulta de compras / facturas emitidas por sucursal
+    $sqlHistorial = "SELECT f.numero_factura, f.fecha, f.total, s.nombre AS sucursal, c.nombre AS cliente 
+                     FROM facturas f 
+                     INNER JOIN sucursales s ON f.sucursal_id = s.id 
+                     INNER JOIN clientes c ON f.cliente_id = c.id 
+                     ORDER BY f.id DESC LIMIT 10";
+    $historial = $pdo->query($sqlHistorial)->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -43,10 +62,65 @@ declare(strict_types=1);
         </div>
     </nav>
 
-    <main>
+    <main class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold">Directorio de Sucursales Físicas</h2>
+            <p class="text-secondary">Visita nuestras salas de ventas y bodegas autorizadas a nivel nacional</p>
+        </div>
 
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+            <?php foreach ($sucursales as $s): ?>
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <span class="badge bg-warning text-dark mb-2"><?= htmlspecialchars($s['ciudad']) ?></span>
+                        <h5 class="fw-bold"><?= htmlspecialchars($s['nombre']) ?></h5>
+                        <p class="small text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i><?= htmlspecialchars($s['direccion']) ?></p>
+                        <p class="small text-secondary mb-1"><i class="bi bi-telephone-fill me-1"></i><?= htmlspecialchars($s['telefono']) ?></p>
+                        <p class="small text-secondary mb-0"><i class="bi bi-clock-fill me-1"></i><?= htmlspecialchars($s['horario']) ?></p>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
 
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white fw-bold">
+                <i class="bi bi-clock-history me-2"></i> Historial Reciente de Compras por Sucursal
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-secondary small">
+                            <tr>
+                                <th>Factura SAR</th>
+                                <th>Fecha</th>
+                                <th>Sucursal</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($historial)): ?>
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No se registran transacciones aún.</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($historial as $h): ?>
+                                <tr>
+                                    <td class="fw-bold"><?= htmlspecialchars($h['numero_factura']) ?></td>
+                                    <td><?= htmlspecialchars($h['fecha']) ?></td>
+                                    <td><span class="badge bg-secondary"><?= htmlspecialchars($h['sucursal']) ?></span></td>
+                                    <td><?= htmlspecialchars($h['cliente']) ?></td>
+                                    <td class="fw-bold text-danger">L. <?= number_format((float)$h['total'], 2) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </main>
+
     <footer class="bg-dark text-light py-4">
         <div class="container">
             <div class="text-center mb-4">
