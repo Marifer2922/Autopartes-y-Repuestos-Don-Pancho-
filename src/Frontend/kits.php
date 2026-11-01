@@ -49,14 +49,7 @@ $adicionales = $kitModel->opciones('adicional');
                     <li class="nav-item"><a href="categorias.php" class="nav-link px-3"><i class="bi bi-grid"></i> Categorías</a></li>
                     <li class="nav-item"><a href="kits.php" class="nav-link px-3 active"><i class="bi bi-box-seam"></i> Kits</a></li>
                     <li class="nav-item"><a href="sucursales.php" class="nav-link px-3"><i class="bi bi-geo-alt"></i> Sucursales</a></li>
-                    <?php if (isset($_SESSION['autenticado']) && $_SESSION['autenticado'] === true): ?>
-                        <li class="nav-item ms-lg-3 mt-2 mt-lg-0 text-white small">
-                            <span class="me-2"><i class="bi bi-person-fill"></i> <?= htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Usuario') ?> (<strong><?= ucfirst($_SESSION['usuario_rol'] ?? '') ?></strong>)</span>
-                            <a href="../Backend/cerrarsesion.php" class="btn btn-danger btn-sm fw-semibold"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item ms-lg-3 mt-2 mt-lg-0"><a href="login.php" class="btn btn-warning fw-semibold"><i class="bi bi-person-circle"></i> Iniciar sesión</a></li>
-                    <?php endif; ?>
+                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0"><a href="login.php" class="btn btn-warning fw-semibold"><i class="bi bi-person-circle"></i> Iniciar sesión</a></li>
                 </ul>
             </div>
         </div>
@@ -164,15 +157,30 @@ $adicionales = $kitModel->opciones('adicional');
             </div>
             <hr class="border-secondary">
             <div class="row g-4">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <h4 class="fw-bold"><i class="bi bi-tools text-warning"></i> Don Pancho</h4>
-                    <p class="text-white-50">Autopartes y Repuestos. Calidad y confianza para el cuidado y mantenimiento de tu vehículo </p>
+                    <p class="text-white-50">Autopartes y Repuestos. Calidad y confianza para el cuidado y mantenimiento de tu vehículo.</p>
                 </div>
-                <div class="col-md-6">
-                    <h5 class="fw-bold">Nuestras sucursales</h5>
-                    <p class="text-white-50 mb-1"><i class="bi bi-geo-alt"></i> Tegucigalpa</p>
-                    <p class="text-white-50 mb-1"><i class="bi bi-geo-alt"></i> San Pedro Sula</p>
-                    <p class="text-white-50 mb-0"><i class="bi bi-geo-alt"></i> La Ceiba</p>
+                <div class="col-md-7">
+                    <h5 class="fw-bold mb-3">Nuestras sucursales físicas</h5>
+                    <div class="row g-3 small text-white-50">
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> Tegucigalpa - Toncontín</p>
+                            <p class="mb-0">Boulevard Comunidad Económica Europea, sector del Aeropuerto Toncontín.</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> Tegucigalpa - Suyapa</p>
+                            <p class="mb-0">Boulevard Suyapa, sector cercano a la Universidad Nacional Autónoma de Honduras.</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> San Pedro Sula - Medina</p>
+                            <p class="mb-0">Barrio Medina, sector de la 7.ª Avenida.</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> La Ceiba - CA-13</p>
+                            <p class="mb-0">Carretera CA-13, sector de acceso a la ciudad de La Ceiba.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <hr class="border-secondary">

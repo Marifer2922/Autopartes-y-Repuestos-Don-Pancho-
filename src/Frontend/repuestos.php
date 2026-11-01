@@ -122,15 +122,30 @@ $repuestos = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <hr class="border-secondary">
             <div class="row g-4">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <h4 class="fw-bold"><i class="bi bi-tools text-warning"></i> Don Pancho</h4>
-                    <p class="text-white-50">Autopartes y Repuestos. Calidad y confianza para el cuidado y mantenimiento de tu vehículo </p>
+                    <p class="text-white-50">Autopartes y Repuestos. Calidad y confianza para el cuidado y mantenimiento de tu vehículo.</p>
                 </div>
-                <div class="col-md-6">
-                    <h5 class="fw-bold">Nuestras sucursales</h5>
-                    <p class="text-white-50 mb-1"><i class="bi bi-geo-alt"></i> Tegucigalpa</p>
-                    <p class="text-white-50 mb-1"><i class="bi bi-geo-alt"></i> San Pedro Sula</p>
-                    <p class="text-white-50 mb-0"><i class="bi bi-geo-alt"></i> La Ceiba</p>
+                <div class="col-md-7">
+                    <h5 class="fw-bold mb-3">Nuestras sucursales físicas</h5>
+                    <div class="row g-3 small text-white-50">
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> Tegucigalpa - Toncontín</p>
+                            <p class="mb-0">Boulevard Comunidad Económica Europea, sector del Aeropuerto Toncontín.</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> Tegucigalpa - Suyapa</p>
+                            <p class="mb-0">Boulevard Suyapa, sector cercano a la Universidad Nacional Autónoma de Honduras.</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> San Pedro Sula - Medina</p>
+                            <p class="mb-0">Barrio Medina, sector de la 7.ª Avenida.</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-1 text-white fw-semibold"><i class="bi bi-geo-alt text-warning"></i> La Ceiba - CA-13</p>
+                            <p class="mb-0">Carretera CA-13, sector de acceso a la ciudad de La Ceiba.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <hr class="border-secondary">
