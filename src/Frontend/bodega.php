@@ -13,6 +13,12 @@
     exit;
     }
 
+    $repuestos = [];
+    if ($pdo !== null) {
+        $stmt = $pdo->query("SELECT codigo, nombre, precio, stock FROM repuestos");
+        $repuestos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     //Carga segura de archivos
     if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['imagenProducto'])){
         //Valida que no exista error al intentar subir el archivo
@@ -134,34 +140,6 @@
 
     <main>
 
-        <!--Mensaje de estado de ingreso de producto-->
-            <?php if($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
-                <?php if($estadoSubida): ?>
-                    <div class="container py-4">
-                        <div class="badge rounded-pill bg-success">
-                            <h5 class="m-2"><i class="bi bi-check2-circle"></i> Excito al ingresar el producto.</h5>
-                        </div>
-                    </div>
-                <?php endif; ?>
-                <?php if(!$estadoSubida): ?>
-                    <div class="container py-4">
-                        <div class="badge rounded-pill bg-danger">
-                            <h5 class="m-2"><i class="bi bi-x-circle"></i> Error al ingresar el nuevo producto</h5>
-                            <p class="m-1"><?= $mensajeEstado ?></p>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            <?php endif; ?>
-
-        <!--Boton para ingresar nuevos productos-->
-            <section class="py-4">
-                <div class="container">
-                    <button type="button" class="btn btn-warning fw-bold" data-bs-toggle="modal" data-bs-target="#modal-nuevo-repuesto">
-                        Ingrese nuevo producto
-                    </button>
-                </div>
-            </section>
-
         <!--Ventana modal para ingresar los nuevos productos-->
             <div class="modal fade" id="modal-nuevo-repuesto" tabindex="-1">
                 <div class="modal-dialog">
@@ -236,6 +214,62 @@
                     </div>
                 </div>
             </div>
+
+        <!--Tabla de inventario-->
+        <section class="py-4">
+            <div class="container">
+                    <div class="text-center mb-2">
+                        <h2 class="display-6 fw-bold">Inventario de repuestos</h2>
+                    </div>
+
+                    <!--Mensaje de estado de ingreso de producto-->
+                    <?php if($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+                        <?php if($estadoSubida): ?>
+                            <div class="container py-4">
+                                <div class="badge rounded-pill bg-success">
+                                    <h5 class="m-2"><i class="bi bi-check2-circle"></i> Excito al ingresar el producto.</h5>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if(!$estadoSubida): ?>
+                            <div class="container py-4">
+                                <div class="badge rounded-pill bg-danger">
+                                    <h5 class="m-2"><i class="bi bi-x-circle"></i> Error al ingresar el nuevo producto</h5>
+                                    <p class="m-1"><?= $mensajeEstado ?></p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <!--Boton para ingresar nuevos productos-->
+                    <button type="button" class="btn btn-warning fw-bold mb-3" data-bs-toggle="modal" data-bs-target="#modal-nuevo-repuesto">
+                        Ingrese nuevo producto
+                    </button>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped-columns border">
+                        <thead class="table-warning">
+                            <tr>
+                            <th scope="col">Código</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Precio</th>
+                            <th scope="col">Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($repuestos as $repuesto): ?>
+                            <tr>
+                                <td><?= $repuesto["codigo"] ?></td>
+                                <td><?= $repuesto["nombre"] ?></td>
+                                <td>L.<?= number_format(floatval($repuesto["precio"]),2) ?></td>
+                                <td><?= $repuesto["stock"] ?></td>
+                            <tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        </table>
+                    </div>
+            </div>
+        </section>
 
     </main>
     <footer class="bg-dark text-light py-4">
