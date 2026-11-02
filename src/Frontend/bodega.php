@@ -1,24 +1,4 @@
 <?php
-    /*declare(strict_types=1);
-
-    require_once __DIR__ . '/../Backend/verificarsesion.php';
-    require_once __DIR__ . '/../../include/conexion.php';
-    require_once __DIR__ . '/../Repuesto.php';
-
-    $conexion = new ConexionBD();
-    $pdo = $conexion->conectar();
-
-    if ($_SESSION['usuario_rol'] !== 'bodeguero') {
-    header('Location: admin.php');
-    exit;
-    }
-
-    $repuestos = [];
-    if ($pdo !== null) {
-        $stmt = $pdo->query("SELECT codigo, nombre, precio, stock FROM repuestos");
-        $repuestos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }*/
-
     declare(strict_types=1);
 
     require_once __DIR__ . '/../Backend/verificarsesion.php';
@@ -40,83 +20,6 @@
         return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }
 
-    /*//Carga segura de archivos
-    if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['imagenProducto'])){
-        //Valida que no exista error al intentar subir el archivo
-        $imagenProducto = $_FILES['imagenProducto'];
-
-        if($imagenProducto['error'] !== UPLOAD_ERR_OK){
-            $estadoSubida = false;
-            $mensajeEstado = "Error al intentar subir la imagen, intentelo de nuevo";
-        } else {
-            //Validación del tamaño máximo del archivo (4MB)
-            $limiteTamaño = 4*1024*1024;
-
-            if($imagenProducto['size'] > $limiteTamaño){
-                $estadoSubida = false;
-                $mensajeEstado = "El tamaño de la imagen excede el límite establecido (4MB)";
-            } else {
-                //Validación de la extensión del archivo
-                $extensionImagen = strtolower(pathinfo($imagenProducto['name'], PATHINFO_EXTENSION));
-                $extensionesPermitidos = ['jpg', 'jpeg', 'png', 'webp'];
-
-                if(!in_array($extensionImagen, $extensionesPermitidos, true)){
-                    $estadoSubida = false;
-                    $mensajeEstado = "El formato de la imagen no es soportado por el sitio, seleccione una imagen
-                            con una de las extensiones permitidas (JPG, JPEG, PNG, WEBP)";
-                } else {
-                    //Validación del tipo MIME del archivo
-                    $infoMime = new finfo(FILEINFO_MIME_TYPE);
-                    $imagenMime = $infoMime->file($imagenProducto['tmp_name']);
-                    $mimePermitidos = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp'];
-
-                    if(!in_array($imagenMime, $mimePermitidos, true)){
-                        $estadoSubida = false;
-                        $mensajeEstado = "El archivo seleccionado no es del tipo imagen valido.";
-                    } else {
-                        //Renombrar imagen y asignación de identificador criptográfico
-                        $nombreNuevoImagen = uniqid('repuesto_') .'.'. $extensionImagen;
-                        //Se asigna el destino del archivo
-                        $ruta = __DIR__ . '/uploads/'; 
-
-                        //Se verifica que la ruta exista, de otro modo crea la carpeta
-                        if (!is_dir($ruta)) {
-                            mkdir($ruta, 0755, true);
-                        }
-
-                        $destinoImagen = $ruta . $nombreNuevoImagen;
-
-                        if(move_uploaded_file($imagenProducto['tmp_name'], $destinoImagen)){
-                            $estadoSubida = true;
-                            
-                            $codigo = htmlspecialchars(trim($_POST['codigoProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
-                            $nombre = htmlspecialchars(trim($_POST['nombreProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
-                            $descripcion = htmlspecialchars(trim($_POST['descripcionProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
-                            $especificaciones = htmlspecialchars(trim($_POST['especificacionProducto'] ?? ''), ENT_QUOTES, 'UTF-8');
-                            $categoria_id = intval(htmlspecialchars(trim($_POST['categoriaProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
-                            $marca_id = intval(htmlspecialchars(trim($_POST['marcaProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
-                            $precio = floatval(htmlspecialchars(trim($_POST['precioProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
-                            $stock = intval(htmlspecialchars(trim($_POST['stockProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
-                            $destacado = intval(htmlspecialchars(trim($_POST['destacadoProducto'] ?? ''), ENT_QUOTES, 'UTF-8'));
-
-                            $datos = ["codigo" => $codigo, "nombre" => $nombre, "descripcion" => $descripcion, "especificaciones" => $especificaciones,
-                                        "categoria_id" => $categoria_id, "marca_id" => $marca_id, "precio" => $precio, "stock" => $stock,
-                                        "fotografia" => $destinoImagen, "destacado" => $destacado];
-
-                            $nuevoProducto = new Repuesto($pdo);
-                            $nuevoProducto->crear($datos);
-
-                        } else {
-                            $estadoSubida = false;
-                            $mensajeEstado = "Error al subir la imagen al directorio final";
-                        }
-                    }
-                }
-            }
-        }
-    }*/
-
-    // Leer un campo sin convertir todavia su valor a numero.
     function leerCampo($nombre)
     {
         $valor = $_POST[$nombre] ?? '';
@@ -128,12 +31,10 @@
         return trim($valor);
     }
 
-    // Crear una clave de seguridad asociada a esta sesion.
     if (!isset($_SESSION['csrf'])) {
         $_SESSION['csrf'] = bin2hex(random_bytes(32));
     }
 
-    // Recuperar el mensaje de la operacion anterior y mostrarlo una sola vez.
     $mensajeInventario = $_SESSION['mensaje_inventario'] ?? '';
     $tipoMensaje = $_SESSION['tipo_mensaje_inventario'] ?? 'success';
     unset($_SESSION['mensaje_inventario'], $_SESSION['tipo_mensaje_inventario']);
@@ -150,7 +51,6 @@
                 );
             }
 
-            // Comprobar que la solicitud pertenece al formulario de esta sesion.
             if (!hash_equals($_SESSION['csrf'], leerCampo('csrf'))) {
                 throw new InvalidArgumentException(
                     'El formulario no es válido o la sesión cambió. Recarga la página.'
@@ -159,7 +59,6 @@
 
             $accion = leerCampo('accion');
 
-            // Procesar la eliminacion antes del registro y la edicion.
             if ($accion === 'eliminar') {
 
                 $idEliminar = filter_var(
@@ -174,10 +73,8 @@
                     );
                 }
 
-                // Utilizar el metodo que ya existe en Repuesto.php.
                 $modeloRepuesto->eliminar($idEliminar);
 
-                // Guardar el mensaje para mostrarlo al regresar al inventario.
                 $_SESSION['mensaje_inventario'] =
                     'Repuesto eliminado correctamente.';
 
@@ -193,7 +90,6 @@
                 );
             }
 
-            // Para editar necesitamos identificar el repuesto.
             $id = 0;
 
             if ($accion === 'editar') {
@@ -210,7 +106,6 @@
                 }
             }
 
-            // Los nombres de la izquierda son los que espera Repuesto.php.
             $datos = [
                 'codigo' => leerCampo('codigoProducto'),
                 'nombre' => leerCampo('nombreProducto'),
@@ -227,16 +122,13 @@
                 throw new InvalidArgumentException('Selecciona Sí o No en destacado.');
             }
 
-            // Sin imagen nueva, actualizar() conserva la fotografia anterior.
             $datos['fotografia'] = null;
 
             $errorFoto = $_FILES['fotografia']['error'] ?? UPLOAD_ERR_NO_FILE;
 
-            // Al crear exigimos foto.
-            // Al editar la procesamos solamente cuando se intenta subir otra.
             if ($accion === 'crear' || $errorFoto !== UPLOAD_ERR_NO_FILE) {
 
-                // Candado 1: el archivo debe llegar sin errores.
+                // Candado 1
                 if ($errorFoto !== UPLOAD_ERR_OK) {
                     throw new InvalidArgumentException(
                         'No se pudo recibir la fotografía. Selecciona una imagen válida.'
@@ -245,14 +137,14 @@
 
                 $foto = $_FILES['fotografia'];
 
-                // Candado 2: maximo 4 MB y archivo no vacio.
+                // Candado 2
                 if ($foto['size'] <= 0 || $foto['size'] > 4 * 1024 * 1024) {
                     throw new InvalidArgumentException(
                         'La imagen debe pesar como máximo 4 MB y no estar vacía.'
                     );
                 }
 
-                // Candado 3: extension permitida y MIME coincidente.
+                // Candado 3
                 $extension = strtolower(
                     pathinfo($foto['name'], PATHINFO_EXTENSION)
                 );
@@ -279,7 +171,7 @@
                     );
                 }
 
-                // Candado 4: nombre aleatorio y carpeta uploads de la raiz.
+                // Candado 4
                 $nombreFoto =
                     'repuesto_' . bin2hex(random_bytes(16)) . '.' . $extension;
 
@@ -301,11 +193,9 @@
 
                 $imagenGuardada = $destino;
 
-                // En la base de datos guardamos solamente el nombre.
                 $datos['fotografia'] = $nombreFoto;
             }
 
-            // Ejecutar solamente la operacion solicitada.
             if ($accion === 'crear') {
 
                 $modeloRepuesto->crear($datos);
@@ -340,14 +230,12 @@
             $mensajeInventario = 'Ocurrió un error inesperado. Revisa la configuración de PHP.';
         }
 
-        // Si fallo el registro, no dejar la nueva fotografia sin un repuesto.
         if (!$guardado && $imagenGuardada !== '') {
             if (!@unlink($imagenGuardada)) {
                 error_log('No se pudo retirar la imagen: ' . $imagenGuardada);
             }
         }
 
-        // Regresar al mismo inventario sin reenviar el POST al recargar.
         $_SESSION['mensaje_inventario'] = $mensajeInventario;
         $_SESSION['tipo_mensaje_inventario'] = $tipoMensaje;
 
@@ -355,18 +243,6 @@
         exit;
 }    
 
-    /*// Consultar el inventario después de procesar los formularios.
-$repuestos = [];
-$errorInventario = '';
-
-try {
-    $repuestos = $modeloRepuesto->listar(null, null, false);
-} catch (PDOException $error) {
-    error_log('Error al consultar el inventario: ' . $error->getMessage());
-    $errorInventario = 'No se pudo consultar el inventario. Revisa la base de datos.';
-}*/
-
-// Consultar el inventario después de procesar los formularios.
 $repuestos = [];
 $categorias = [];
 $marcas = [];
@@ -423,7 +299,7 @@ try {
                     <li class="nav-item"><a href="categorias.php" class="nav-link px-3"><i class="bi bi-grid"></i> Categorías</a></li>
                     <li class="nav-item"><a href="kits.php" class="nav-link px-3"><i class="bi bi-box-seam"></i> Kits</a></li>
                     <li class="nav-item"><a href="sucursales.php" class="nav-link px-3"><i class="bi bi-geo-alt"></i> Sucursales</a></li>
-                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0"><a href="login.php" class="btn btn-warning fw-semibold"><i class="bi bi-person-circle"></i> Iniciar sesión</a></li>
+                    <?php require __DIR__ . '/partials/menu-sesion.php'; ?>
                 </ul>
             </div>
         </div>
@@ -431,7 +307,6 @@ try {
 
     <main>
 
-        <!--Ventana modal para ingresar los nuevos productos-->
             <div class="modal fade" id="modal-nuevo-repuesto" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -442,11 +317,8 @@ try {
                         <div class="modal-body">
                             <h4>Ingrese los datos solicitados:</h4>
                             <form method="post" action="bodega.php" enctype="multipart/form-data">
-
                                 <input type="hidden" name="accion" value="crear">
-
                                 <input type="hidden" name="csrf" value="<?= escapar($_SESSION['csrf']) ?>">
-
                                 <div class="p-2">
                                     <label class="form-label" for="input-codigo-producto">Código del repuesto: </label>
                                     <input type="text" class="form-control" name="codigoProducto" id="input-codigo-producto" required>
@@ -485,55 +357,27 @@ try {
                                 </div>
                                 <div class="p-2">
                                     <label class="form-label" for="input-precio-producto">Precio: </label>
-
-                                    <!-- <input type="text" class="form-control" name="precioProducto" id="input-precio-producto" required> --> 
-
                                     <input type="number" class="form-control" name="precioProducto" id="input-precio-producto" min="0" step="0.01" required>
-
                                 </div>
                                 <div class="p-2">
                                     <label class="form-label" for="input-stock-producto">Cantidad en bodega: </label>
-
-                                    <!-- <input type="number" class="form-control" name="stockProducto" id="input-stock-producto" min="0" required> -->
-
                                     <input type="number" class="form-control" name="stockProducto" id="input-stock-producto" min="0" step="1" required>
-
                                 </div>
-
-                                <!-- <div class="p-2">
-                                    <label class="form-label" for="input-imagen-producto">Imagen del repuesto: </label>
-                                    <input type="file" class="form-control" name="imagenProducto" id="input-imagen-producto">
-                                </div> -->
-
                                 <div class="p-2">
                                     <label class="form-label" for="input-imagen-producto">Imagen del repuesto: </label>
                                     <input type="file" class="form-control" name="fotografia" id="input-imagen-producto" accept=".jpg,.jpeg,.png,.webp" required>
-
                                     <div class="form-text">
                                         Selecciona una imagen JPG, JPEG, PNG o WEBP.
                                         Tamaño máximo permitido: 4 MB.
                                     </div>
                                 </div>
-
                                 <div class="p-2">
                                     <label class="form-label" for="input-destacado-producto">Destacado: </label>
-
-                                    <!-- <select class="form-select" name="destacadoProducto" id="input-destacado-producto" required>
-                                        <option value="1">Si</option>
-                                        <option value="2">No</option>
-                                    </select> -->
-
                                     <select class="form-select" name="destacadoProducto" id="input-destacado-producto" required>
                                         <option value="0">No</option>
                                         <option value="1">Sí</option>
                                     </select>
-
                                 </div>
-
-                                <!--<div class="p-2 d-flex justify-content-center">
-                                    <button type="submit" class="btn btn-warning">Ingresar nuevo producto</button>
-                                </div>-->
-
                                 <div class="p-2 d-flex justify-content-end gap-2">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar </button>
                                     <button type="submit" class="btn btn-warning">Guardar repuesto </button>
@@ -545,59 +389,41 @@ try {
                 </div>
             </div>
 
-            <!-- Modal para editar un repuesto -->
             <div class="modal fade" id="modal-editar-repuesto" tabindex="-1" aria-labelledby="titulo-editar-repuesto" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-scrollable">
-
                     <form class="modal-content" id="form-editar-repuesto" method="post" action="bodega.php" enctype="multipart/form-data">
                         <div class="modal-header bg-secondary text-light">
                             <h3 class="modal-title fs-5" id="titulo-editar-repuesto">
                                 Editar repuesto
                             </h3>
-
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                         </div>
-
                         <input type="hidden" name="accion" value="editar">
-
                         <input type="hidden" name="idRepuesto" id="editar-id">
-
                         <input type="hidden" name="csrf" value="<?= escapar($_SESSION['csrf']) ?>" >
-
                         <div class="modal-body">
-
                             <div class="mb-3">
                                 <label for="editar-codigo" class="form-label">Código: </label>
-
                                 <input type="text" class="form-control" id="editar-codigo" name="codigoProducto" maxlength="30" required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-nombre" class="form-label">Nombre: </label>
-
                                 <input type="text" class="form-control" id="editar-nombre" name="nombreProducto" maxlength="120" required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-especificaciones" class="form-label">
                                     Especificaciones:
                                 </label>
-
                                 <textarea class="form-control" id="editar-especificaciones" name="especificacionProducto" rows="2" maxlength="255"></textarea>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-descripcion" class="form-label"> Descripción: </label>
-
                                 <textarea class="form-control" id="editar-descripcion" name="descripcionProducto" rows="2" maxlength="255"></textarea>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-categoria" class="form-label"> Categoría: </label>
-
                                 <select class="form-select" id="editar-categoria" name="categoriaProducto" required>
                                     <option value="">Selecciona una categoría</option>
-
                                     <?php foreach ($categorias as $categoria): ?>
                                         <option value="<?= (int) $categoria['id'] ?>">
                                             <?= escapar($categoria['nombre']) ?>
@@ -605,7 +431,6 @@ try {
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-marca" class="form-label">Marca: </label>
 
@@ -619,29 +444,21 @@ try {
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-precio" class="form-label">Precio: </label>
-
                                 <input type="number" class="form-control" id="editar-precio" name="precioProducto" min="0" step="0.01" required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-stock" class="form-label">Cantidad en bodega: </label>
-
                                 <input type="number" class="form-control" id="editar-stock" name="stockProducto" min="0" step="1" required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-fotografia" class="form-label">Nueva fotografía (opcional): </label>
-
                                 <input type="file" class="form-control" id="editar-fotografia" name="fotografia" accept=".jpg,.jpeg,.png,.webp">
-
                                 <div class="form-text">
                                     JPG, JPEG, PNG o WEBP. Máximo 4 MB.
                                 </div>
                             </div>
-
                             <div class="mb-3">
                                 <label for="editar-destacado" class="form-label">Destacado: </label>
 
@@ -650,16 +467,13 @@ try {
                                     <option value="1">Sí</option>
                                 </select>
                             </div>
-
                             <p class="small text-muted mb-0">
                                 Si no seleccionas una nueva fotografía, se conservará la actual.
                             </p>
 
                         </div>
-
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar </button>
-
                             <button type="submit" class="btn btn-warning">Guardar cambios </button>
                         </div>
 
@@ -667,97 +481,43 @@ try {
                 </div>
             </div>
 
-            <!-- Modal para confirmar la eliminacion de un repuesto -->
-                <div
-                    class="modal fade"
-                    id="modal-eliminar-repuesto"
-                    tabindex="-1"
-                    aria-labelledby="titulo-eliminar-repuesto"
-                    aria-hidden="true"
-                >
+                <div class="modal fade" id="modal-eliminar-repuesto" tabindex="-1" aria-labelledby="titulo-eliminar-repuesto" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
-
-                        <form
-                            class="modal-content"
-                            id="form-eliminar-repuesto"
-                            method="post"
-                            action="bodega.php"
-                        >
+                        <form class="modal-content" id="form-eliminar-repuesto" method="post" action="bodega.php">
                             <div class="modal-header bg-danger text-white">
-
                                 <h3 class="modal-title fs-5" id="titulo-eliminar-repuesto">
                                     Eliminar repuesto
                                 </h3>
-
-                                <button
-                                    type="button"
-                                    class="btn-close btn-close-white"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Cerrar"
-                                ></button>
-
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                             </div>
-
                             <input type="hidden" name="accion" value="eliminar">
-
-                            <input
-                                type="hidden"
-                                name="idRepuesto"
-                                id="eliminar-id"
-                            >
-
-                            <input
-                                type="hidden"
-                                name="csrf"
-                                value="<?= escapar($_SESSION['csrf']) ?>"
-                            >
-
+                            <input type="hidden" name="idRepuesto" id="eliminar-id">
+                            <input type="hidden" name="csrf" value="<?= escapar($_SESSION['csrf']) ?>">
                             <div class="modal-body">
-
                                 <p>¿Deseas eliminar este repuesto?</p>
-
                                 <p class="mb-1">
                                     Código:
                                     <strong id="eliminar-codigo"></strong>
                                 </p>
-
                                 <p>
                                     Nombre:
                                     <strong id="eliminar-nombre"></strong>
                                 </p>
-
                                 <p class="text-danger small mb-0">
                                     Esta acción elimina el registro del inventario.
                                     No se puede deshacer desde este panel.
                                 </p>
-
                             </div>
-
                             <div class="modal-footer">
-
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary"
-                                    data-bs-dismiss="modal"
-                                >
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                     Cancelar
                                 </button>
-
-                                <button
-                                    type="submit"
-                                    class="btn btn-danger"
-                                >
-                                    Sí, eliminar
-                                </button>
-
+                                <button type="submit" class="btn btn-danger">Sí, eliminar </button>
                             </div>
-
                         </form>
-
                     </div>
                 </div>
 
-        <!--Tabla de inventario-->
         <section class="py-4">
             <div class="container">
                 <?php if ($_SESSION['usuario_rol'] === 'admin'): ?>
@@ -790,7 +550,6 @@ try {
                         <?php endif; ?>
                     <?php endif; ?> -->
 
-                    <!-- Resultado de la operacion -->
                     <?php if ($mensajeInventario !== ''): ?>
 
                         <div
@@ -799,36 +558,11 @@ try {
                         >
                             <?= escapar($mensajeInventario) ?>
                         </div>
-
                     <?php endif; ?>
 
-                    <!--Boton para ingresar nuevos productos-->
                     <button type="button" class="btn btn-warning fw-bold mb-3" data-bs-toggle="modal" data-bs-target="#modal-nuevo-repuesto">
                         Ingrese nuevo producto
                     </button>
-
-                    <!--<div class="table-responsive">
-                        <table class="table table-striped-columns border">
-                        <thead class="table-warning">
-                            <tr>
-                            <th scope="col">Código</th>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Precio</th>
-                            <th scope="col">Stock</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach($repuestos as $repuesto): ?>
-                            <tr>
-                                <td><?= $repuesto["codigo"] ?></td>
-                                <td><?= $repuesto["nombre"] ?></td>
-                                <td>L.<?= number_format(floatval($repuesto["precio"]),2) ?></td>
-                                <td><?= $repuesto["stock"] ?></td>
-                            <tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                        </table>
-                    </div>-->
 
                     <div class="table-responsive">
                         <table class="table table-striped table-hover align-middle border">
@@ -863,54 +597,29 @@ try {
                                     <?php foreach ($repuestos as $repuesto): ?>
                                         <tr>
                                             <td><?= escapar($repuesto['codigo']) ?></td>
-
                                             <td><?= escapar($repuesto['nombre']) ?></td>
-
                                             <td><?= escapar($repuesto['categoria']) ?></td>
-
                                             <td>
                                                 <?= escapar($repuesto['marca'] ?? 'Sin marca específica') ?>
                                             </td>
-
                                             <td class="text-nowrap">
                                                 L. <?= number_format((float) $repuesto['precio'], 2) ?>
                                             </td>
-
                                             <td><?= (int) $repuesto['stock'] ?></td>
-
                                             <td class="text-nowrap">
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-primary btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-editar-repuesto"
-
-                                                    data-id="<?= (int) $repuesto['id'] ?>"
-                                                    data-codigo="<?= escapar($repuesto['codigo']) ?>"
-                                                    data-nombre="<?= escapar($repuesto['nombre']) ?>"
-                                                    data-descripcion="<?= escapar($repuesto['descripcion'] ?? '') ?>"
-                                                    data-especificaciones="<?= escapar($repuesto['especificaciones'] ?? '') ?>"
-                                                    data-categoria="<?= (int) $repuesto['categoria_id'] ?>"
-                                                    data-marca="<?= escapar($repuesto['marca_id'] ?? '') ?>"
-                                                    data-precio="<?= escapar($repuesto['precio']) ?>"
-                                                    data-stock="<?= (int) $repuesto['stock'] ?>"
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-editar-repuesto"
+                                                    data-id="<?= (int) $repuesto['id'] ?>" data-codigo="<?= escapar($repuesto['codigo']) ?>" data-nombre="<?= escapar($repuesto['nombre']) ?>"
+                                                    data-descripcion="<?= escapar($repuesto['descripcion'] ?? '') ?>" data-especificaciones="<?= escapar($repuesto['especificaciones'] ?? '') ?>"
+                                                    data-categoria="<?= (int) $repuesto['categoria_id'] ?>" data-marca="<?= escapar($repuesto['marca_id'] ?? '') ?>"
+                                                    data-precio="<?= escapar($repuesto['precio']) ?>" data-stock="<?= (int) $repuesto['stock'] ?>"
                                                     data-destacado="<?= (int) $repuesto['destacado'] ?>"
-
                                                     onclick="cargarEdicion(this)"
                                                 >
                                                     Editar
                                                 </button>
 
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-danger btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-eliminar-repuesto"
-
-                                                    data-id="<?= (int) $repuesto['id'] ?>"
-                                                    data-codigo="<?= escapar($repuesto['codigo']) ?>"
-                                                    data-nombre="<?= escapar($repuesto['nombre']) ?>"
-
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modal-eliminar-repuesto"
+                                                    data-id="<?= (int) $repuesto['id'] ?>" data-codigo="<?= escapar($repuesto['codigo']) ?>" data-nombre="<?= escapar($repuesto['nombre']) ?>"
                                                     onclick="cargarEliminacion(this)"
                                                 >
                                                     Eliminar

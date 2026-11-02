@@ -1,10 +1,8 @@
 <?php
 declare(strict_types=1);
 
-// Verificar la sesion antes de mostrar cualquier contenido.
 require_once __DIR__ . '/../Backend/verificarsesion.php';
 
-// Mantener la distribucion de roles que ya tiene el proyecto.
 if ($_SESSION['usuario_rol'] !== 'admin') {
     header('Location: bodega.php');
     exit;
@@ -17,7 +15,6 @@ function escapar($texto)
     return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }
 
-// Esta lista contiene enlaces, no nuevas operaciones de base de datos.
 $accesos = [
     [
         'titulo' => 'Inventario de repuestos',
